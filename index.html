@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>몰입 카드 보안 페이지</title>
+  <style>
+    body {
+      font-family: 'Apple SD Gothic Neo', sans-serif;
+      background-color: #f8f4ef;
+      color: #02254a;
+      text-align: center;
+      padding: 40px 20px;
+      box-sizing: border-box;
+    }
+
+    #form-section {
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    #info-message {
+      margin-bottom: 30px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    input {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      padding: 12px 14px;
+      margin: 10px auto;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      color: #02254a;
+    }
+
+    input::placeholder {
+      color: #02254a;
+      opacity: 0.7;
+    }
+
+    button {
+      width: 100%;
+      max-width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #02254a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #011b35;
+    }
+
+    @media screen and (max-width: 480px) {
+      body {
+        padding: 20px 15px;
+      }
+
+      h2 {
+        font-size: 18px;
+      }
+
+      #info-message {
+        font-size: 14px;
+      }
+
+      input, button {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="form-section">
+    <div id="info-message">
+      ✔️ 나의 코드는 ‘최초 등록’ 기기 1대에 한해 사용 가능해요. <br />
+      ✔️ 몰입 카드 사용은 ‘코드를 등록한 날로부터’ 1년까지 유효해요.
+    </div>
+    <h2>몰입 카드 등록</h2>
+    <input type="text" id="userCode" placeholder="유저코드" />
+    <input type="text" id="subCode" placeholder="구독코드" />
+    <button onclick="submitCodes()">등록하기</button>
+  </div>
+
+  <script>
+    const endpoint = "https://your-firebase-functions-url/verify"; // ✅ 실제 주소로 교체
+
+    window.onload = () => {
+      const savedUserCode = localStorage.getItem("userCode");
+      const savedSubCode = localStorage.getItem("subCode");
+
+      if (savedUserCode && savedSubCode) {
+        verifyCodes(savedUserCode, savedSubCode);
+      }
+    };
+
+    async function submitCodes() {
+      const userCode = document.getElementById("userCode").value.trim();
+      const subCode = document.getElementById("subCode").value.trim();
+
+      if (!userCode && !subCode) {
+        alert("유저코드와 구독코드를 입력해주세요.");
+        return;
+      } else if (!userCode) {
+        alert("유저코드를 입력해주세요.");
+        return;
+      } else if (!subCode) {
+        alert("구독코드를 입력해주세요.");
+        return;
+      }
+
+      verifyCodes(userCode, subCode);
+    }
+
+    async function verifyCodes(userCode, subCode) {
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userCode, subCode }),
+        });
+
+        const result = await res.json();
+
+        switch (result.status) {
+          case "VALID":
+            localStorage.setItem("userCode", userCode);
+            localStorage.setItem("subCode", subCode);
+            window.location.href = "https://yourdomain.com/timer"; // ✅ 타이머 페이지로 변경
+            break;
+          case "EXPIRED":
+            window.location.href = "https://yourdomain.com/expired"; // ✅ 만료 안내 페이지
+            break;
+          case "USED":
+            alert("이미 사용한 코드에요. 새로운 코드를 입력해 주세요.");
+            break;
+          case "INVALID":
+            alert("코드가 일치하지 않습니다. 코드를 다시 확인 해주세요.");
+            break;
+          default:
+            alert("알 수 없는 오류가 발생했어요. 잠시 후 다시 시도해주세요.");
+        }
+      } catch (error) {
+        console.error("서버 오류:", error);
+        alert("서버 연결에 실패했습니다. 인터넷 연결을 확인해주세요.");
+      }
+    }
+  </script>
+</body>
+</html>
