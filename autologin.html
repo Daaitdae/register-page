@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>자동 로그인 중...</title>
+<style>
+body {
+background-color: #f7f7f7;
+color: #333;
+font-family: Arial, sans-serif;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+margin: 0;
+}
+.loader {
+text-align: center;
+}
+</style>
+</head>
+<body>
+<div class="loader">
+<p>🔄 자동 로그인 중입니다...</p>
+</div>
+
+<script>
+window.addEventListener("DOMContentLoaded", async () => {
+const userCode = localStorage.getItem("userCode");
+const subCode = localStorage.getItem("subCode");
+  // 필수 정보 누락 시 → 등록 페이지로 이동
+  if (!userCode || !subCode) {
+    window.location.href = "/verify.html";
+    return;
+  }
+
+  try {
+    const res = await fetch("<https://yourdomain.com/checkStatus>", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userCode, subCode })
+    });
+
+    const result = await res.json();
+
+    // 상태별 처리
+    if (["VALID", "BASIC", "EXPIRED"].includes(result.status)) {
+      // 최신 정보 갱신
+      localStorage.setItem("expiresAt", result.expiresAt);
+      localStorage.setItem("finalExpiresAt", result.finalExpiresAt);
+
+      // 백엔드에서 전달한 redirectTo로 이동
+      window.location.href = result.redirectTo;
+    } else {
+      alert(result.errorMessage || "알 수 없는 오류가 발생했습니다.");
+      window.location.href = "/verify.html";
+    }
+  } catch (err) {
+    console.error(err);
+    window.location.href = "/verify.html";
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구독 코드 등록</title>
+<style>
+body {
+font-family: 'Arial', sans-serif;
+background-color: #f4f4f4;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+height: 100vh;
+margin: 0;
+padding: 20px;
+}
+.container {
+background: white;
+padding: 30px;
+border-radius: 12px;
+box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+max-width: 400px;
+width: 100%;
+}
+input {
+width: 100%;
+padding: 10px;
+margin: 10px 0;
+font-size: 16px;
+}
+button {
+width: 100%;
+padding: 12px;
+background: #004cff;
+color: white;
+border: none;
+border-radius: 6px;
+font-size: 16px;
+cursor: pointer;
+}
+.message {
+margin-top: 20px;
+color: red;
+font-size: 14px;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>구독 코드 등록</h2>
+<input type="text" id="userCode" placeholder="유저 코드 입력">
+<input type="text" id="subCode" placeholder="구독 코드 입력">
+<button onclick="verifyCodes()">등록하기</button>
+<div class="message" id="message"></div>
+</div>
+
+<script>
+async function verifyCodes() {
+const userCode = document.getElementById('userCode').value.trim();
+const subCode = document.getElementById('subCode').value.trim();
+const message = document.getElementById('message');
+  if (!userCode || !subCode) {
+    message.textContent = '유저코드와 구독코드를 모두 입력해주세요.';
+    return;
+  }
+
+  try {
+    const res = await fetch("<https://your-backend-url/verifyCode>", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userCode, subCode })
+    });
+
+    const result = await res.json();
+
+    switch (result.status) {
+      case "VALID":
+        localStorage.setItem("userCode", userCode);
+        localStorage.setItem("subCode", subCode);
+        localStorage.setItem("expiresAt", result.expiresAt);
+        localStorage.setItem("finalExpiresAt", result.finalExpiresAt);
+        window.location.href = result.redirectTo;
+        break;
+
+      case "USED":
+      case "INVALID":
+        message.textContent = result.errorMessage;
+        break;
+
+      case "ERROR":
+        message.textContent = "서버 오류가 발생했습니다.";
+        break;
+
+      default:
+        message.textContent = "알 수 없는 오류가 발생했습니다.";
+    }
+  } catch (err) {
+    console.error(err);
+    message.textContent = "요청 중 문제가 발생했습니다.";
+  }
+}
+</script>
+</body>
+</html>
