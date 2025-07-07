@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>오늘의 몰입</title>
+  <link href="https://fonts.googleapis.com/css2?family=MaruBuri:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f8f4ef;
+      --text-color: #02254a;
+      --btn-color: #e8dfd6;
+    }
+
+    body {
+      font-family: 'MaruBuri', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px 60px;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .timer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .timer-controls button {
+      background-color: var(--btn-color);
+      color: var(--text-color);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .circle-timer {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 20px;
+    }
+
+    .circle-timer svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .circle-timer circle {
+      fill: none;
+      stroke-width: 6;
+    }
+
+    .bg {
+      stroke: var(--btn-color);
+    }
+
+    .progress {
+      stroke: var(--text-color);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .time-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--text-color);
+    }
+
+    .reflection {
+      text-align: center;
+      margin-top: 24px;
+      max-width: 360px;
+      width: 100%;
+    }
+
+    .reflection p {
+      margin: 8px 0 16px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .reflection a,
+    .reflection button {
+      display: block;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto 10px;
+      background-color: var(--btn-color);
+      color: var(--text-color);
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 480px) {
+      .circle-timer {
+        width: 180px;
+        height: 180px;
+      }
+      .time-text {
+        font-size: 28px;
+      }
+
+      .timer-controls button {
+        font-size: 14px;
+        padding: 8px 12px;
+      }
+
+      .reflection a,
+      .reflection button {
+        font-size: 15px;
+        padding: 10px;
+      }
+
+      .reflection p {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>오늘의 몰입</h1>
+
+  <div class="timer-controls">
+    <button onclick="startTimer(10)">10분</button>
+    <button onclick="startTimer(15)">15분</button>
+    <button onclick="startTimer(25)">25분</button>
+    <button onclick="startTimer(40)">40분</button>
+    <button onclick="startTimer(60)">60분</button>
+  </div>
+
+  <div class="circle-timer">
+    <svg viewBox="0 0 220 220">
+      <circle class="bg" cx="110" cy="110" r="100"></circle>
+      <circle class="progress" cx="110" cy="110" r="100" stroke-dasharray="628.3" stroke-dashoffset="0"></circle>
+    </svg>
+    <div class="time-text" id="time">00:00</div>
+  </div>
+
+  <div class="reflection">
+    <p>⏰ 몰입이 끝났다면 회고를 남겨보세요.</p>
+    <a href="https://your-reflection-link.com">📝 회고하러 가기</a>
+  </div>
+
+  <!-- 구독 연장 및 코드 등록 안내 영역 -->
+ <div class="reflection">
+  <p style="font-size: 16px; margin-bottom: 10px;">
+    💬 질문과 함께하는 몰입을 다시 시작하고 싶다면? </p>
+  <a href="https://your-tally-url.com">🌿 구독 연장 신청하기</a>
+  <button onclick="resetAccess()">✔️ 새 구독 코드 등록하기</button>
+</div>
+
+  <script>
+    let timerInterval;
+    let totalSeconds;
+    let remainingSeconds;
+
+    function startTimer(minutes) {
+      clearInterval(timerInterval);
+      totalSeconds = minutes * 60;
+      remainingSeconds = totalSeconds;
+      updateTimeDisplay();
+      updateProgressCircle();
+
+      timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateTimeDisplay();
+        updateProgressCircle();
+        if (remainingSeconds <= 0) {
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+    }
+
+    function updateTimeDisplay() {
+      const min = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
+      const sec = String(remainingSeconds % 60).padStart(2, '0');
+      document.getElementById("time").textContent = `${min}:${sec}`;
+    }
+
+    function updateProgressCircle() {
+      const circle = document.querySelector('.progress');
+      const radius = 100;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference * (1 - remainingSeconds / totalSeconds);
+      circle.style.strokeDasharray = `${circumference}`;
+      circle.style.strokeDashoffset = `${offset}`;
+    }
+
+    function resetAccess() {
+      localStorage.removeItem("userCode");
+      localStorage.removeItem("subCode");
+      window.location.href = "/secure"; // 🔐 보안 인증 페이지로 교체
+    }
+  </script>
+
+</body>
+</html>

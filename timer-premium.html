@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>오늘의 몰입</title>
+  <link href="https://fonts.googleapis.com/css2?family=MaruBuri:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #f8f4ef;
+      --text-color: #02254a;
+      --btn-color: #e8dfd6;
+    }
+
+    body {
+      font-family: 'MaruBuri', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      padding: 40px 20px 0;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .timer-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+
+    .timer-controls button {
+      background-color: var(--btn-color);
+      color: var(--text-color);
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .circle-timer {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 20px;
+    }
+
+    .circle-timer svg {
+      transform: rotate(-90deg);
+    }
+
+    .circle-timer circle {
+      fill: none;
+      stroke-width: 6;
+    }
+
+    .bg {
+      stroke: var(--btn-color);
+    }
+
+    .progress {
+      stroke: var(--text-color);
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    .time-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      font-weight: bold;
+      color: var(--text-color);
+    }
+
+    .reflection {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .reflection p {
+      margin: 8px 0 16px;
+      font-size: 16px;
+    }
+
+    .reflection a {
+      display: inline-block;
+      background-color: var(--btn-color);
+      color: var(--text-color);
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    @media (max-width: 480px) {
+      .circle-timer {
+        width: 180px;
+        height: 180px;
+      }
+      .circle-timer svg {
+        width: 180px;
+        height: 180px;
+      }
+      .time-text {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>오늘의 몰입</h1>
+
+  <div class="timer-controls">
+    <button onclick="startTimer(10)">10분</button>
+    <button onclick="startTimer(15)">15분</button>
+    <button onclick="startTimer(25)">25분</button>
+    <button onclick="startTimer(40)">40분</button>
+    <button onclick="startTimer(60)">60분</button>
+  </div>
+
+  <div class="circle-timer">
+    <svg width="220" height="220">
+      <circle class="bg" cx="110" cy="110" r="100"></circle>
+      <circle class="progress" cx="110" cy="110" r="100" stroke-dasharray="628.3" stroke-dashoffset="0"></circle>
+    </svg>
+    <div class="time-text" id="time">00:00</div>
+  </div>
+
+  <div class="reflection">
+    <p>⏰ 몰입이 끝났다면 회고를 남겨보세요.</p>
+    <a href="https://your-reflection-link.com">📝 회고하러 가기</a>
+  </div>
+
+  <script>
+    let timerInterval;
+    let totalSeconds;
+    let remainingSeconds;
+
+    function startTimer(minutes) {
+      clearInterval(timerInterval);
+      totalSeconds = minutes * 60;
+      remainingSeconds = totalSeconds;
+      updateTimeDisplay();
+      updateProgressCircle();
+
+      timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateTimeDisplay();
+        updateProgressCircle();
+        if (remainingSeconds <= 0) {
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+    }
+
+    function updateTimeDisplay() {
+      const min = String(Math.floor(remainingSeconds / 60)).padStart(2, '0');
+      const sec = String(remainingSeconds % 60).padStart(2, '0');
+      document.getElementById("time").textContent = `${min}:${sec}`;
+    }
+
+    function updateProgressCircle() {
+      const circle = document.querySelector('.progress');
+      const radius = 100;
+      const circumference = 2 * Math.PI * radius;
+      const offset = circumference * (1 - remainingSeconds / totalSeconds);
+      circle.style.strokeDasharray = `${circumference}`;
+      circle.style.strokeDashoffset = `${offset}`;
+    }
+  </script>
+
+</body>
+</html>
