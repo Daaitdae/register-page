@@ -1,0 +1,14 @@
+# Firebase 관련
+firebase-config.js
+serviceAccount.json
+
+# 환경변수
+.env
+.env.*
+
+# Node.js 환경 시
+node_modules/
+
+# 기타 민감 정보
+*.key
+*.pem
